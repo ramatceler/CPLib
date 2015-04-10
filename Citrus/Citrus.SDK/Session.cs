@@ -21,15 +21,22 @@ namespace Citrus.SDK
             _signUpToken = (OAuthToken)await rest.Post<OAuthToken>(Service.SignUpToken, new SignupTokenRequest());
         }
 
-        public static async Task<bool> SignupUser(string email, string mobile)
+        public static async Task<User> SignupUser(string email, string mobile)
         {
             await GetSignupToken();
             var user = new User { Email = email, Mobile = mobile };
-
+            _user = user;
             RestWrapper rest = new RestWrapper();
             _user = (User)await rest.Post<User>(Service.Signup, user);
 
-            return !string.IsNullOrEmpty(user.UserName);
+            if (!string.IsNullOrEmpty(_user.UserName))
+            {
+                RandomPasswordGenerator randomPasswordGenerator = new RandomPasswordGenerator();
+                _user.Password = randomPasswordGenerator.Generate(_user.Email, _user.Mobile);
+                return _user;
+            }
+
+            return new User();
         }
 
         public static string GetAuthToken()
@@ -37,15 +44,26 @@ namespace Citrus.SDK
             return _signUpToken != null ? _signUpToken.AccessToken : string.Empty;
         }
 
-        public static bool SigninUser()
+        public static async Task<bool> SigninUser()
         {
             var request = new SigninRequest();
             request.User = _user;
 
             RestWrapper rest = new RestWrapper();
-            var result = rest.Post<object>(Service.Signin,)
+            var result = await rest.Post<object>(Service.Signin, request);
 
             return result != null;
+        }
+
+        public static async Task<bool> ResetPassword()
+        {
+            RestWrapper rest = new RestWrapper();
+            var result = await rest.Post<User>(Service.ResetPassword, new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("username", _user.UserName)
+            });
+
+            return !string.IsNullOrEmpty(result.ToString());
         }
     }
 }

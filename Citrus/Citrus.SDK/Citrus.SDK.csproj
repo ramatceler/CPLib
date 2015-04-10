@@ -86,8 +86,11 @@
     <Compile Include="Common\Config.cs" />
     <Compile Include="Common\Enum.cs" />
     <Compile Include="Common\Extensions.cs" />
+    <Compile Include="Common\MD5Algorithm.cs" />
+    <Compile Include="Common\RandomPasswordGenerator.cs" />
     <Compile Include="Common\RestWrapper.cs" />
     <Compile Include="Common\Service.cs" />
+    <Compile Include="Entity\BadError.cs" />
     <Compile Include="Entity\IEntity.cs" />
     <Compile Include="Entity\OAuthToken.cs" />
     <Compile Include="Entity\SigninRequest.cs" />

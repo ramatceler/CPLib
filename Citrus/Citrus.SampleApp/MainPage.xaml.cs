@@ -19,13 +19,21 @@ namespace Citrus.SampleApp
         public MainPage()
         {
             InitializeComponent();
-            Config.Environment = EnvironmentType.Sandbox;
-            Config.SignUpId = "ticketnew-signup";
-            Config.SignUpSecret = "59f2356c566ad78169add22e0d930026";
             
-            var res = Session.SignupUser("ram@celerapps.com","1245788956").Result;
+            Config.Environment = EnvironmentType.Sandbox;
+            Config.SignUpId = "test-signup";
+            Config.SignUpSecret = "c78ec84e389814a05d3ae46546d16d2e";
+            Config.SignInId = "test-signin";
+            Config.SignInSecret = "52f7e15efd4208cf5345dd554443fd99";
+
             // Sample code to localize the ApplicationBar
             //BuildLocalizedApplicationBar();
+        }
+
+        async void MainPage_Loaded(object sender, object e)
+        {
+          //var res = await Session.SignupUser("ram@celerapps12gfs4g5712448yf54.com", "1245788956");
+            //var result =await Session.ResetPassword();
         }
 
         // Sample code for building a localized ApplicationBar

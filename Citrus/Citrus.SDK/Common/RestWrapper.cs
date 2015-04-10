@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -26,25 +27,51 @@ namespace Citrus.SDK.Common
             HttpClient client = new HttpClient();
             HttpResponseMessage response;
 
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
+                Session.GetAuthToken());
 
             if (objectToPost != null)
             {
                 FormUrlEncodedContent content = new FormUrlEncodedContent(objectToPost.ToKeyValuePair());
-                response = await client.PostAsync(Config.Environment.GetEnumDescription()+relativeServicePath, content);
+                response =
+                    await client.PostAsync(Config.Environment.GetEnumDescription() + relativeServicePath, content);
             }
             else
             {
-                response = await client.PostAsync(Config.Environment.GetEnumDescription() + relativeServicePath, null);
+                response =
+                    await client.PostAsync(Config.Environment.GetEnumDescription() + relativeServicePath, new StringContent(""));
             }
 
             if (response.IsSuccessStatusCode)
             {
                 JsonSerializer serializer = new JsonSerializer();
-                return (IEntity)serializer.Deserialize<T>(new JsonTextReader(new StringReader(await response.Content.ReadAsStringAsync())));
+                return
+                    (IEntity)
+                        serializer.Deserialize<T>(
+                            new JsonTextReader(new StringReader(await response.Content.ReadAsStringAsync())));
+            }
+            else
+            {
+                if (response.StatusCode == HttpStatusCode.BadRequest)
+                {
+                    throw new Exception();
+                }
             }
 
             return null;
+        }
+
+        public async Task<bool> Post<T>(string relativeServicePath, IEnumerable<KeyValuePair<string, string>> urlParams)
+        {
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response;
+
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Session.GetAuthToken());
+
+            FormUrlEncodedContent content = new FormUrlEncodedContent(urlParams);
+            response = await client.PostAsync(Config.Environment.GetEnumDescription() + relativeServicePath, content);
+            
+            return response.IsSuccessStatusCode;
         }
     }
 }
