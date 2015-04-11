@@ -18,16 +18,42 @@ namespace Citrus.SDK
             if (_signUpToken != null) return;
 
             RestWrapper rest = new RestWrapper();
-            _signUpToken = (OAuthToken)await rest.Post<OAuthToken>(Service.SignUpToken, new SignupTokenRequest());
+            var result = await rest.Post<OAuthToken>(Service.SignUpToken, new SignupTokenRequest());
+            if (!(result is Error))
+            {
+                _signUpToken = (OAuthToken)result;
+            }
+            else
+            {
+                Utility.ParseAndThrowError((result as Error).Response);
+            }
         }
 
         public static async Task<User> SignupUser(string email, string mobile)
         {
+            if (string.IsNullOrEmpty(email))
+            {
+                throw new ArgumentException("Invalid parameter", "email");
+            }
+
+            if (string.IsNullOrEmpty(mobile))
+            {
+                throw new ArgumentException("Invalid parameter", "mobile");
+            }
+
             await GetSignupToken();
             var user = new User { Email = email, Mobile = mobile };
             _user = user;
             RestWrapper rest = new RestWrapper();
-            _user = (User)await rest.Post<User>(Service.Signup, user);
+            var result = await rest.Post<User>(Service.Signup, user);
+            if (!(result is Error))
+            {
+                _user = (User)result;
+            }
+            else
+            {
+                Utility.ParseAndThrowError((result as Error).Response);
+            }
 
             if (!string.IsNullOrEmpty(_user.UserName))
             {
@@ -57,13 +83,23 @@ namespace Citrus.SDK
 
         public static async Task<bool> ResetPassword()
         {
+            if (string.IsNullOrEmpty(_user.UserName))
+            {
+                throw new UnauthorizedAccessException("User is not logged to perform reset password");
+            }
+
             RestWrapper rest = new RestWrapper();
             var result = await rest.Post<User>(Service.ResetPassword, new List<KeyValuePair<string, string>>
             {
                 new KeyValuePair<string, string>("username", _user.UserName)
             });
 
-            return !string.IsNullOrEmpty(result.ToString());
+            if (!(result is Error))
+            {
+                return !string.IsNullOrEmpty(result.ToString());
+            }
+
+            Utility.ParseAndThrowError((result as Error).Response);
         }
     }
 }

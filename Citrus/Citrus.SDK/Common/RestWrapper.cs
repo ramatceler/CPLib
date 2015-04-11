@@ -50,18 +50,11 @@ namespace Citrus.SDK.Common
                         serializer.Deserialize<T>(
                             new JsonTextReader(new StringReader(await response.Content.ReadAsStringAsync())));
             }
-            else
-            {
-                if (response.StatusCode == HttpStatusCode.BadRequest)
-                {
-                    throw new Exception();
-                }
-            }
 
-            return null;
+            return await ReturnError(response);
         }
 
-        public async Task<bool> Post<T>(string relativeServicePath, IEnumerable<KeyValuePair<string, string>> urlParams)
+        public async Task<IEntity> Post<T>(string relativeServicePath, IEnumerable<KeyValuePair<string, string>> urlParams)
         {
             HttpClient client = new HttpClient();
             HttpResponseMessage response;
@@ -70,8 +63,22 @@ namespace Citrus.SDK.Common
 
             FormUrlEncodedContent content = new FormUrlEncodedContent(urlParams);
             response = await client.PostAsync(Config.Environment.GetEnumDescription() + relativeServicePath, content);
-            
-            return response.IsSuccessStatusCode;
+
+            if (response.IsSuccessStatusCode)
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                return
+                    (IEntity)
+                        serializer.Deserialize<T>(
+                            new JsonTextReader(new StringReader(await response.Content.ReadAsStringAsync())));
+            }
+
+            return await ReturnError(response);
+        }
+
+        private async Task<IEntity> ReturnError(HttpResponseMessage response)
+        {
+            return response.StatusCode == HttpStatusCode.BadRequest ? new Error(await response.Content.ReadAsStringAsync()) : new Error();
         }
     }
 }
