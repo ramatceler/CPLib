@@ -13,6 +13,10 @@ namespace Citrus.SDK
         private static OAuthToken _signUpToken;
         private static User _user;
 
+        /// <summary>
+        /// Get the Signup Token.
+        /// </summary>
+        /// <returns></returns>
         private static async Task GetSignupToken()
         {
             if (_signUpToken != null) return;
@@ -29,6 +33,12 @@ namespace Citrus.SDK
             }
         }
 
+        /// <summary>
+        /// Sign up an user account.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="mobile"></param>
+        /// <returns></returns>
         public static async Task<User> SignupUser(string email, string mobile)
         {
             if (string.IsNullOrEmpty(email))
@@ -65,11 +75,19 @@ namespace Citrus.SDK
             return new User();
         }
 
+        /// <summary>
+        /// Get Auth token.
+        /// </summary>
+        /// <returns></returns>
         public static string GetAuthToken()
         {
             return _signUpToken != null ? _signUpToken.AccessToken : string.Empty;
         }
 
+        /// <summary>
+        /// Sign in User account.
+        /// </summary>
+        /// <returns></returns>
         public static async Task<bool> SigninUser()
         {
             var request = new SigninRequest();
@@ -120,6 +138,10 @@ namespace Citrus.SDK
             return result != null;
         }
 
+        /// <summary>
+        /// Reset the password.
+        /// </summary>
+        /// <returns></returns>
         public static async Task<bool> ResetPassword()
         {
             if (string.IsNullOrEmpty(_user.UserName))
@@ -142,5 +164,30 @@ namespace Citrus.SDK
 
             return false;
         }
+
+        /// <summary>
+        /// Gets the User account's balance.
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<bool> GetBalance()
+        {
+            if (string.IsNullOrEmpty(_user.UserName))
+            {
+                throw new UnauthorizedAccessException("User is not logged to perform reset password");
+            }
+
+            RestWrapper rest = new RestWrapper();
+            var result = await rest.Post<User>(Service.GetBalance, new List<KeyValuePair<string, string>>());
+
+            if (!(result is Error))
+            {
+                return !string.IsNullOrEmpty(result.ToString());
+            }
+
+            Utility.ParseAndThrowError((result as Error).Response);
+
+            return false;
+        }
+
     }
 }

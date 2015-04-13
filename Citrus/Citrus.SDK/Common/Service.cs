@@ -15,5 +15,6 @@ namespace Citrus.SDK.Common
         public const string Signin = "oauth/token";
         public const string UpdatePassword = ServiceVersion + "identity/me/password";
         public const string RandonPassword = "oauth/token";
+        public const string GetBalance = "/service/v2/prepayment/balance";
     }
 }
