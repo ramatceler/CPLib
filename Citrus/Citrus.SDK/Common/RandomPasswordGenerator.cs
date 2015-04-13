@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Text;
+using Citrus.SDK.Common.Md5Algorithm;
 
 namespace Citrus.SDK.Common
 {
-    public class RandomPasswordGenerator 
+    public class RandomPasswordGenerator
     {
         public String Generate(String email, String mobile)
         {
@@ -18,12 +19,13 @@ namespace Citrus.SDK.Common
 
         /// <summary>
         /// Generates a non-random positive number from a string. 
-	    /// @param data the string to generate seed from.
+        /// @param data the string to generate seed from.
         /// @return the value of the 3 highest bytes of the MD5 sum of data.
         /// </summary>
         public int GenerateSeed(String data)
         {
-            var hash = Encoding.UTF8.GetBytes(Md5Algorithm.MD5.GetMd5String(data));
+            var md5 = MD5.Create("MD5");
+            var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(data));
             hash = rangeCopy(hash, hash.Length - 3, hash.Length);
             return new BigMath.BigInteger(1, hash).IntValue;
         }
@@ -79,8 +81,8 @@ namespace Citrus.SDK.Common
         /// <returns></returns>
         public int NextInt(int max)
         {
-            state = 7*state%3001;
-            return (state - 1)%max;
+            state = 7 * state % 3001;
+            return (state - 1) % max;
         }
 
         /// <summary>
@@ -91,7 +93,7 @@ namespace Citrus.SDK.Common
         public char NextLetter()
         {
             int n = NextInt(52);
-            return (char) (n + ((n < 26) ? 'A' : 'a' - 26));
+            return (char)(n + ((n < 26) ? 'A' : 'a' - 26));
         }
     }
 }

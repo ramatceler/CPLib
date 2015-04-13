@@ -139,6 +139,8 @@ namespace Citrus.SDK
             }
 
             Utility.ParseAndThrowError((result as Error).Response);
+
+            return false;
         }
     }
 }
